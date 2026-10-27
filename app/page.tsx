@@ -1,7 +1,22 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SaikiuMark } from "./components/saikiu-mark";
 import { WaitlistForm } from "./components/waitlist-form";
+
+const CTA_NOTA = "Gratis · Sin compromiso";
+
+const FUNDADOR = {
+  nombre: "Sofía Casado Sainz",
+  rol: "Founder · Saikiu",
+  iniciales: "SC",
+  cita: "Creé AuditorIA para que cada empresa sepa dónde tiene sentido invertir en IA antes de gastar tiempo y dinero.",
+  // Ruta a una foto en /public (p. ej. "/brand/fundador.jpg"). Vacío: se muestran las iniciales.
+  foto: "",
+  // URL del perfil de LinkedIn. Vacío: no se muestra el botón.
+  linkedin: "",
+  email: "casado.sainz1809@gmail.com",
+};
 
 const NAV = [
   { href: "#auditoria", label: "AuditorIA" },
@@ -186,6 +201,24 @@ function SectionHeader({
   );
 }
 
+/* CTA secundario a mitad de página: lleva a la lista de espera. */
+function CtaBlock({ label, center }: { label: string; center?: boolean }) {
+  return (
+    <div className={`mt-12 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-14 ${center ? "sm:justify-center" : ""}`}>
+      <a
+        href="#lista-de-espera"
+        className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-accent-fg transition hover:bg-accent-hover"
+      >
+        {label}
+        <span aria-hidden className="transition group-hover:translate-x-0.5">
+          →
+        </span>
+      </a>
+      <span className="text-center text-sm text-muted sm:text-left">{CTA_NOTA}</span>
+    </div>
+  );
+}
+
 function ReportPreview() {
   const rows = [
     { area: "Atención al cliente", saving: "≈ 22 h/mes", w: "88%", high: true },
@@ -264,7 +297,7 @@ export default function Home() {
             href="#lista-de-espera"
             className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-fg transition hover:bg-accent-hover"
           >
-            Lista de espera
+            Acceso anticipado
           </a>
         </div>
       </header>
@@ -276,36 +309,39 @@ export default function Home() {
           <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-28 lg:pt-32">
             <div>
               <a
-                href="#estado"
+                href="#lista-de-espera"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs text-muted transition hover:text-foreground"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                Beta en junio de 2027
+                Acceso anticipado · Plazas limitadas para la beta
               </a>
-              <h1 className="mt-6 text-[2.4rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.6rem]">
-                Detecta oportunidades de IA y automatización{" "}
-                <span className="text-muted">antes de invertir tiempo y dinero.</span>
+              <h1 className="mt-6 text-[2.2rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.3rem]">
+                Descubre qué procesos de tu empresa puedes automatizar con IA,{" "}
+                <span className="text-muted">y cuáles no merecen la pena.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-                AuditorIA ayuda a empresas a identificar procesos, oportunidades y riesgos
-                relacionados con IA y automatización.
+                AuditorIA analiza tus herramientas, procesos y costes y te entrega un informe
+                priorizado, revisado por un especialista.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#lista-de-espera"
                   className="rounded-lg bg-accent px-6 py-3 text-center text-sm font-semibold text-accent-fg transition hover:bg-accent-hover"
                 >
-                  Unirme a la lista de espera
+                  Solicitar acceso anticipado
                 </a>
                 <a
-                  href="#auditoria"
+                  href="#informe-ejemplo"
                   className="rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold text-foreground transition hover:border-muted/40 hover:bg-surface"
                 >
-                  Conocer AuditorIA
+                  Ver un informe de ejemplo
                 </a>
               </div>
+              <p className="mt-4 text-sm text-muted">{CTA_NOTA} · Solo te escribimos para la beta</p>
             </div>
-            <ReportPreview />
+            <div id="informe-ejemplo" className="scroll-mt-24">
+              <ReportPreview />
+            </div>
           </div>
         </section>
 
@@ -413,6 +449,8 @@ export default function Home() {
                 tecnología interna de Saikiu.
               </p>
             </div>
+
+            <CtaBlock label="Quiero mi auditoría" />
           </div>
         </section>
 
@@ -431,6 +469,65 @@ export default function Home() {
                   <p className="mt-2 leading-relaxed text-muted">{p.text}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Quién está detrás */}
+        <section id="fundador" className="scroll-mt-16 border-t border-border">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-28">
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+              <SectionHeader
+                eyebrow="Quién está detrás"
+                title="Una persona real detrás de cada informe."
+              />
+              <figure className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+                <blockquote className="text-xl leading-relaxed tracking-tight sm:text-2xl">
+                  “{FUNDADOR.cita}”
+                </blockquote>
+                <figcaption className="mt-8 flex flex-col gap-6 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    {FUNDADOR.foto ? (
+                      <Image
+                        src={FUNDADOR.foto}
+                        alt={FUNDADOR.nombre}
+                        width={56}
+                        height={56}
+                        className="h-14 w-14 rounded-full border border-border object-cover"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-background font-semibold"
+                      >
+                        {FUNDADOR.iniciales}
+                      </span>
+                    )}
+                    <div>
+                      <p className="font-semibold">{FUNDADOR.nombre}</p>
+                      <p className="text-sm text-muted">{FUNDADOR.rol}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm">
+                    {FUNDADOR.linkedin && (
+                      <a
+                        href={FUNDADOR.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg border border-border px-4 py-2 font-medium transition hover:border-muted/40 hover:bg-background"
+                      >
+                        LinkedIn
+                      </a>
+                    )}
+                    <a
+                      href={`mailto:${FUNDADOR.email}`}
+                      className="rounded-lg border border-border px-4 py-2 font-medium transition hover:border-muted/40 hover:bg-background"
+                    >
+                      Escríbeme
+                    </a>
+                  </div>
+                </figcaption>
+              </figure>
             </div>
           </div>
         </section>
@@ -514,6 +611,8 @@ export default function Home() {
                 </details>
               ))}
             </div>
+
+            <CtaBlock label="Reservar mi plaza en la beta" center />
           </div>
         </section>
       </main>

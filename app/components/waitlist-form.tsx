@@ -261,7 +261,7 @@ export function WaitlistForm() {
           "Enviando..."
         ) : (
           <>
-            Unirme a la lista de espera
+            Reservar mi plaza
             <span aria-hidden className="transition group-hover:translate-x-0.5">
               →
             </span>
