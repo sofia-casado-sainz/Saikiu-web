@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { SaikiuMark } from "./components/saikiu-mark";
 import { WaitlistForm } from "./components/waitlist-form";
 
 const NAV = [
@@ -99,26 +101,9 @@ const FAQ = [
   },
   {
     q: "¿Qué hacéis con mis datos?",
-    a: "Los datos de la lista de espera solo se usan para contactarte sobre AuditorIA. No los compartimos con terceros.",
+    a: "Los datos de la lista de espera solo se usan para contactarte sobre AuditorIA. No los vendemos ni los cedemos a terceros. Tienes todos los detalles en nuestra política de privacidad.",
   },
 ];
-
-/* Símbolo de Saikiu: pista de circuito en forma de "S" con dos nodos. */
-function SaikiuMark({ className = "h-7 w-7" }: { className?: string }) {
-  return (
-    <svg viewBox="24 18 72 84" className={className} aria-hidden>
-      <path
-        d="M84 30 H52 Q36 30 36 46 Q36 60 52 60 H68 Q84 60 84 76 Q84 90 68 90 H36"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={11}
-        strokeLinejoin="round"
-      />
-      <circle cx="84" cy="30" r="9" fill="none" stroke="currentColor" strokeWidth={6} />
-      <circle cx="36" cy="90" r="9" fill="none" stroke="currentColor" strokeWidth={6} />
-    </svg>
-  );
-}
 
 function Logo() {
   return (
@@ -556,6 +541,7 @@ export default function Home() {
               <ul className="mt-3 space-y-2 text-muted">
                 <li><a href="#lista-de-espera" className="transition hover:text-foreground">Lista de espera</a></li>
                 <li><a href="#faq" className="transition hover:text-foreground">FAQ</a></li>
+                <li><Link href="/politica-privacidad" className="transition hover:text-foreground">Política de privacidad</Link></li>
               </ul>
             </div>
           </div>

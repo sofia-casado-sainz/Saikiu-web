@@ -1,23 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent, type ReactNode } from "react";
 
-type WaitlistEntry = {
-  nombre: string;
-  apellidos: string;
-  email: string;
-  empresa: string;
-  cargo: string;
-  empleados: string;
-  sector: string;
-  problema: string;
-  usaIA: string;
-  usaAutomatizaciones: string;
-  pagaria: string;
-  valor: string;
-  privacidad: boolean;
-  fecha: string;
-};
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xljjjqyr";
+
+type Status = "idle" | "sending" | "success" | "error";
 
 const EMPLEADOS = ["1–10", "11–50", "51–200", "201–500", "Más de 500"];
 
@@ -114,58 +102,46 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function WaitlistForm() {
-  const [entries, setEntries] = useState<WaitlistEntry[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const sending = status === "sending";
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const get = (k: string) => String(data.get(k) ?? "").trim();
+    const form = e.currentTarget;
+    setStatus("sending");
 
-    const entry: WaitlistEntry = {
-      nombre: get("nombre"),
-      apellidos: get("apellidos"),
-      email: get("email"),
-      empresa: get("empresa"),
-      cargo: get("cargo"),
-      empleados: get("empleados"),
-      sector: get("sector"),
-      problema: get("problema"),
-      usaIA: get("usaIA"),
-      usaAutomatizaciones: get("usaAutomatizaciones"),
-      pagaria: get("pagaria"),
-      valor: get("valor"),
-      privacidad: data.get("privacidad") === "on",
-      fecha: new Date().toISOString(),
-    };
-
-    // Sin backend por ahora: la inscripción se guarda solo en el estado local.
-    setEntries((prev) => [...prev, entry]);
-    setSubmitted(true);
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`Formspree respondió ${res.status}`);
+      form.reset();
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
   }
 
-  if (submitted) {
-    const last = entries[entries.length - 1];
+  if (status === "success") {
     return (
       <div
         role="status"
         className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-border bg-surface p-8 text-center sm:p-10"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-accent">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden>
-            <path d="M5 12.5l4.5 4.5L19 7.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-2xl">
+          <span aria-hidden>✅</span>
         </div>
         <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-          Gracias por apuntarte a la lista de espera
+          Gracias por apuntarte a la lista de espera.
         </h3>
         <p className="mx-auto mt-3 max-w-sm leading-relaxed text-muted">
-          Te escribiremos a <span className="text-foreground">{last?.email}</span> cuando abramos
-          la beta de AuditorIA.
+          Te avisaremos cuando AuditorIA comience las pruebas.
         </p>
         <button
           type="button"
-          onClick={() => setSubmitted(false)}
+          onClick={() => setStatus("idle")}
           className="mt-8 text-sm text-muted underline-offset-4 transition hover:text-foreground hover:underline"
         >
           Inscribir a otra persona
@@ -175,7 +151,18 @@ export function WaitlistForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
+    <form
+      onSubmit={handleSubmit}
+      action={FORMSPREE_ENDPOINT}
+      method="POST"
+      aria-busy={sending}
+      className="space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8"
+    >
+      <input type="hidden" name="source" value="saikiu-web" />
+      <input type="hidden" name="_subject" value="Nueva inscripción en la lista de espera de AuditorIA" />
+      {/* Honeypot anti-spam de Formspree: los usuarios reales no lo ven ni lo rellenan. */}
+      <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+
       <Group title="Sobre ti">
         <Field label="Nombre" htmlFor="nombre">
           <input id="nombre" name="nombre" required autoComplete="given-name" className={inputClass} />
@@ -245,17 +232,41 @@ export function WaitlistForm() {
 
       <label className="flex items-start gap-3 border-t border-border pt-6 text-sm text-muted">
         <input type="checkbox" name="privacidad" required className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
-        <span>Acepto la política de privacidad.</span>
+        <span>
+          Acepto la{" "}
+          <Link
+            href="/politica-privacidad"
+            target="_blank"
+            className="text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            política de privacidad
+          </Link>
+          .
+        </span>
       </label>
+
+      {status === "error" && (
+        <p role="alert" className="rounded-lg border border-control bg-background px-4 py-3 text-sm text-foreground">
+          No hemos podido enviar tu inscripción. Revisa tu conexión e inténtalo de nuevo en unos
+          minutos.
+        </p>
+      )}
 
       <button
         type="submit"
-        className="group flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-accent-fg transition hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        disabled={sending}
+        className="group flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-accent-fg transition hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-wait disabled:opacity-70"
       >
-        Unirme a la lista de espera
-        <span aria-hidden className="transition group-hover:translate-x-0.5">
-          →
-        </span>
+        {sending ? (
+          "Enviando..."
+        ) : (
+          <>
+            Unirme a la lista de espera
+            <span aria-hidden className="transition group-hover:translate-x-0.5">
+              →
+            </span>
+          </>
+        )}
       </button>
     </form>
   );
