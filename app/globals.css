@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* Tema claro (por defecto). El rojo de marca se reserva para el logo. */
+:root {
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --foreground: #0b1020;
+  --muted: #475569;
+  --soft: #1f2937;
+  --border: #e2e8f0;
+  --accent: #0b1020;
+  --accent-hover: #1f2937;
+  --accent-fg: #ffffff;
+  --line: #94a3b8;
+  --brand: #d90429;
+  --control: #64748b;
+}
+
+/* Tema oscuro: se activa con la preferencia del sistema. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1020;
+    --surface: #111827;
+    --foreground: #f8fafc;
+    --muted: #94a3b8;
+    --soft: #e5e7eb;
+    --border: #1f2937;
+    --accent: #f8fafc;
+    --accent-hover: #e2e8f0;
+    --accent-fg: #0b1020;
+    --line: #475569;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-soft: var(--soft);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-brand: var(--brand);
+  --color-control: var(--control);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--foreground);
+}
+
+/* Trazo de circuito animado (referencia: portadas de Saikiu) */
+@keyframes trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.circuit-trace {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: trace 2.4s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .circuit-trace {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
