@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 const title = "AuditorIA by Saikiu — Detecta oportunidades de IA y automatización";
 const description =
-  "AuditorIA ayuda a empresas a identificar procesos, oportunidades y riesgos relacionados con IA y automatización, antes de invertir tiempo y dinero. Con revisión humana en cada informe.";
+  "AuditorIA ayuda a pymes, autónomos, freelances y profesionales a identificar procesos, oportunidades y riesgos relacionados con IA y automatización, antes de invertir tiempo y dinero. Con revisión humana en cada informe.";
 
 export const metadata: Metadata = {
   title,
@@ -29,6 +29,8 @@ export const metadata: Metadata = {
     "auditoría de IA",
     "automatización",
     "pymes",
+    "autónomos",
+    "freelances",
     "inteligencia artificial",
     "riesgos IA",
   ],

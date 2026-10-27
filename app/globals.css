@@ -14,6 +14,7 @@
   --line: #94a3b8;
   --brand: #d90429;
   --control: #64748b;
+  --danger: #b91c1c;
 }
 
 /* Tema oscuro: se activa con la preferencia del sistema. */
@@ -29,6 +30,7 @@
     --accent-hover: #e2e8f0;
     --accent-fg: #0b1020;
     --line: #475569;
+    --danger: #fca5a5;
   }
 }
 
@@ -44,6 +46,7 @@
   --color-accent-fg: var(--accent-fg);
   --color-brand: var(--brand);
   --color-control: var(--control);
+  --color-danger: var(--danger);
   --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-geist-mono);
 }

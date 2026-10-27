@@ -10,7 +10,7 @@ const FUNDADOR = {
   nombre: "Sofía Casado Sainz",
   rol: "Founder · Saikiu",
   iniciales: "SC",
-  cita: "Creé AuditorIA para que cada empresa sepa dónde tiene sentido invertir en IA antes de gastar tiempo y dinero.",
+  cita: "Creé AuditorIA para que cualquier persona o negocio, grande o pequeño, sepa dónde tiene sentido usar IA antes de gastar tiempo y dinero.",
   // Ruta a una foto en /public (p. ej. "/brand/fundador.jpg"). Vacío: se muestran las iniciales.
   foto: "",
   // URL del perfil de LinkedIn. Vacío: no se muestra el botón.
@@ -28,7 +28,7 @@ const NAV = [
 const ANALISIS = [
   {
     title: "Herramientas IA",
-    text: "Qué herramientas de IA usa tu equipo, dónde se solapan y qué alternativas encajan mejor.",
+    text: "Qué herramientas de IA usas tú o tu equipo, dónde se solapan y qué alternativas encajan mejor.",
     icon: "M4 6h16M4 12h16M4 18h10",
   },
   {
@@ -59,8 +59,8 @@ const ANALISIS = [
 ];
 
 const PASOS = [
-  { title: "Lead", text: "Nos cuentas tu empresa y lo que quieres mejorar." },
-  { title: "Clasificación", text: "Identificamos sector, tamaño y tipo de necesidad." },
+  { title: "Lead", text: "Nos cuentas cómo trabajas y lo que quieres mejorar." },
+  { title: "Clasificación", text: "Identificamos tu perfil, tu sector y el tipo de necesidad." },
   { title: "IA especializada", text: "Cada caso se asigna al modelo más adecuado." },
   { title: "Análisis", text: "Evaluamos procesos, herramientas, riesgos y costes." },
   { title: "Presupuesto preliminar", text: "Estimamos alcance e inversión de las mejoras." },
@@ -70,27 +70,27 @@ const PASOS = [
 
 const PERFILES = [
   {
-    title: "Pymes digitales",
-    text: "Empresas que trabajan en la nube y quieren ganar eficiencia sin montar un equipo de datos.",
+    title: "Pymes",
+    text: "Empresas que quieren ganar eficiencia con IA sin montar un equipo técnico ni contratar una gran consultora.",
   },
   {
-    title: "Fundadores y dirección",
-    text: "Quienes necesitan decidir dónde invertir en IA con criterio, no por moda.",
+    title: "Autónomos y freelances",
+    text: "Profesionales que trabajan por su cuenta y quieren recuperar horas de tareas repetitivas.",
   },
   {
-    title: "Operaciones",
-    text: "Equipos que conviven con tareas manuales y quieren una hoja de ruta para eliminarlas.",
+    title: "Profesionales sin empresa",
+    text: "Personas que quieren organizar mejor su trabajo con IA, aunque no tengan una empresa detrás.",
   },
   {
-    title: "Agencias y consultoras",
-    text: "Firmas que quieren ofrecer diagnósticos de IA a sus clientes con un método consistente.",
+    title: "Equipos y responsables",
+    text: "Dirección, operaciones o marketing: quien necesita decidir dónde invertir en IA con criterio, no por moda.",
   },
 ];
 
 const ESTADO = [
   { when: "Hoy", title: "En desarrollo", text: "Construyendo la metodología y el motor de análisis.", current: true },
   { when: "Junio 2027", title: "Beta", text: "Acceso anticipado para la lista de espera." },
-  { when: "Agosto 2027", title: "Lanzamiento", text: "AuditorIA disponible para todas las empresas." },
+  { when: "Agosto 2027", title: "Lanzamiento", text: "AuditorIA disponible para todo el mundo." },
 ];
 
 const FAQ = [
@@ -99,8 +99,12 @@ const FAQ = [
     a: "Un informe con el estado actual de tus herramientas y procesos, los riesgos detectados, una estimación de costes y una lista de oportunidades priorizadas por impacto y esfuerzo, junto a un presupuesto preliminar.",
   },
   {
+    q: "¿Necesito tener una empresa?",
+    a: "No. AuditorIA sirve igual para pymes que para autónomos, freelances o personas que trabajan por su cuenta. Analizamos tu forma de trabajar, sea cual sea su tamaño.",
+  },
+  {
     q: "¿Necesito conocimientos técnicos?",
-    a: "No. AuditorIA está pensado para responsables de negocio. El informe explica cada recomendación en lenguaje claro.",
+    a: "No. AuditorIA está pensado para cualquier persona, no solo perfiles técnicos. El informe explica cada recomendación en lenguaje claro.",
   },
   {
     q: "¿Lo hace todo una IA?",
@@ -316,12 +320,13 @@ export default function Home() {
                 Acceso anticipado · Plazas limitadas para la beta
               </a>
               <h1 className="mt-6 text-[2.2rem] font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.3rem]">
-                Descubre qué procesos de tu empresa puedes automatizar con IA,{" "}
-                <span className="text-muted">y cuáles no merecen la pena.</span>
+                Descubre qué parte de tu trabajo puedes automatizar con IA,{" "}
+                <span className="text-muted">y cuál no merece la pena.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-                AuditorIA analiza tus herramientas, procesos y costes y te entrega un informe
-                priorizado, revisado por un especialista.
+                Para pymes, autónomos, freelances y profesionales. AuditorIA analiza tus
+                herramientas, procesos y costes y te entrega un informe priorizado, revisado por un
+                especialista.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
@@ -358,8 +363,9 @@ export default function Home() {
             />
             <div className="space-y-5 text-lg leading-relaxed text-muted lg:pt-12">
               <p>
-                La mayoría de empresas ya usa alguna herramienta de IA, pero pocas saben si la
-                aprovechan bien, cuánto les cuesta o qué riesgos asumen.
+                Casi todo el mundo usa ya alguna herramienta de IA, pero pocos saben si la
+                aprovechan bien, cuánto les cuesta o qué riesgos asumen. Da igual que seas una pyme,
+                un autónomo o trabajes por tu cuenta.
               </p>
               <p>
                 AuditorIA combina análisis con IA y revisión de especialistas para darte una
@@ -368,7 +374,7 @@ export default function Home() {
               </p>
               <dl className="grid grid-cols-1 gap-5 border-t border-border pt-6 sm:grid-cols-3">
                 {[
-                  { k: "Para", v: "Pymes digitales" },
+                  { k: "Para", v: "Pymes y profesionales" },
                   { k: "Resultado", v: "Informe accionable" },
                   { k: "Garantía", v: "Revisión humana" },
                 ].map((i) => (
@@ -459,7 +465,7 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-28">
             <SectionHeader
               eyebrow="Para quién"
-              title="Pensado para empresas digitales que quieren avanzar con criterio."
+              title="Para cualquiera que quiera trabajar mejor con IA, tenga o no una empresa."
             />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16">
               {PERFILES.map((p, i) => (
@@ -572,7 +578,7 @@ export default function Home() {
               <SectionHeader
                 eyebrow="Lista de espera"
                 title="Sé de los primeros en probar AuditorIA."
-                text="Cuéntanos un poco sobre tu empresa. Te avisaremos cuando abramos la beta."
+                text="Cuéntanos un poco sobre ti y tu forma de trabajar. Te avisaremos cuando abramos la beta."
               />
               <ul className="mt-10 space-y-4">
                 {["Acceso prioritario a la beta", "Novedades del desarrollo", "Sin compromiso"].map((b) => (

@@ -61,7 +61,7 @@ export default function PoliticaPrivacidad() {
             <p>A través del formulario de lista de espera recogemos:</p>
             <ul className="list-disc space-y-1 pl-5">
               <li>Datos de contacto: nombre, apellidos y email.</li>
-              <li>Datos profesionales: empresa, cargo, número de empleados y sector.</li>
+              <li>Datos sobre tu actividad: ocupación o cargo, empresa o proyecto (opcional), número de personas y sector.</li>
               <li>
                 Tus respuestas sobre el problema que quieres resolver, tu uso actual de IA y
                 automatizaciones, y tu interés en una solución como AuditorIA.
@@ -74,7 +74,7 @@ export default function PoliticaPrivacidad() {
             <ul className="list-disc space-y-1 pl-5">
               <li>Gestionar tu inscripción en la lista de espera.</li>
               <li>Avisarte cuando AuditorIA comience las pruebas o se lance, y contactarte en relación con ello.</li>
-              <li>Entender mejor las necesidades de las empresas interesadas para orientar el desarrollo del producto.</li>
+              <li>Entender mejor las necesidades de las personas y empresas interesadas para orientar el desarrollo del producto.</li>
             </ul>
             <p>No vendemos tus datos ni los usamos para enviarte publicidad de terceros.</p>
           </Section>

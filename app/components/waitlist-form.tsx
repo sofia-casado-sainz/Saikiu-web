@@ -1,38 +1,116 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FocusEvent, type FormEvent, type ReactNode } from "react";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xljjjqyr";
 
 type Status = "idle" | "sending" | "success" | "error";
+type Errors = Record<string, string>;
 
-const EMPLEADOS = ["1–10", "11–50", "51–200", "201–500", "Más de 500"];
+const PERSONAS = ["Solo yo", "2–10", "11–50", "51–250", "Más de 250"];
 
 const SECTORES = [
-  "E-commerce / Retail",
-  "SaaS / Software",
-  "Agencia / Marketing",
   "Consultoría / Servicios profesionales",
-  "Educación",
-  "Salud",
-  "Finanzas / Seguros",
+  "Diseño / Creatividad / Contenido",
+  "Agencia / Marketing",
+  "Tecnología / Software",
+  "E-commerce / Retail",
+  "Educación / Formación",
+  "Salud / Bienestar",
+  "Legal / Finanzas / Seguros",
   "Inmobiliaria",
-  "Industria",
+  "Industria / Logística",
+  "Uso personal",
   "Otro",
 ];
 
-const inputClass =
-  "w-full rounded-lg border border-control bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted/60 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/25";
+/*
+ * Campos obligatorios en orden de aparición, con el texto del resumen de errores
+ * y el mensaje que se muestra si están vacíos.
+ */
+const REQUIRED_FIELDS: { name: string; label: string; message: string }[] = [
+  { name: "nombre", label: "Nombre", message: "Escribe tu nombre." },
+  { name: "apellidos", label: "Apellidos", message: "Escribe tus apellidos." },
+  { name: "email", label: "Email", message: "Escribe tu email." },
+  { name: "cargo", label: "Ocupación o cargo", message: "Indica a qué te dedicas." },
+  { name: "personas", label: "¿Cuántas personas sois?", message: "Elige una opción." },
+  { name: "sector", label: "Sector", message: "Elige un sector." },
+  { name: "problema", label: "Qué te gustaría resolver", message: "Cuéntanos qué te gustaría resolver." },
+  { name: "usaIA", label: "¿Utilizas IA actualmente?", message: "Elige una opción." },
+  { name: "usaAutomatizaciones", label: "¿Utilizas automatizaciones actualmente?", message: "Elige una opción." },
+  { name: "pagaria", label: "¿Pagarías por una solución así?", message: "Elige una opción." },
+  { name: "valor", label: "¿Cuánto valor tendría para ti?", message: "Elige una opción." },
+  { name: "privacidad", label: "Política de privacidad", message: "Debes aceptar la política de privacidad para apuntarte." },
+];
+
+/* Id del elemento al que enfocar o enlazar desde el resumen de errores. */
+const focusId = (name: string) =>
+  ["usaIA", "usaAutomatizaciones", "pagaria", "valor"].includes(name) ? `${name}-0` : name;
+
+function validateField(form: HTMLFormElement, name: string): string {
+  const field = REQUIRED_FIELDS.find((f) => f.name === name);
+  if (!field) return "";
+  const item = form.elements.namedItem(name);
+  const el = item instanceof RadioNodeList ? (item[0] as HTMLInputElement) : (item as HTMLInputElement | null);
+  if (!el) return "";
+  if (el.validity.valueMissing) return field.message;
+  if (el.validity.typeMismatch && name === "email") return "Escribe un email válido, por ejemplo: tu@email.com.";
+  return "";
+}
+
+const inputBase =
+  "w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted outline-none transition focus:ring-2";
+const inputOk = "border-control focus:border-accent focus:ring-accent/25";
+const inputInvalid = "border-danger focus:border-danger focus:ring-danger/25";
+const inputClass = (invalid: boolean) => `${inputBase} ${invalid ? inputInvalid : inputOk}`;
+
+/* Atributos de accesibilidad comunes a todos los controles. */
+const a11y = (name: string, errors: Errors) => ({
+  "aria-invalid": errors[name] ? true : undefined,
+  "aria-describedby": errors[name] ? `${name}-error` : undefined,
+});
+
+function RequiredMark({ optional }: { optional?: boolean }) {
+  return optional ? (
+    <span className="ml-1 font-normal text-muted">(opcional)</span>
+  ) : (
+    <span aria-hidden className="ml-0.5 text-foreground">
+      *
+    </span>
+  );
+}
+
+function ErrorMessage({ name, error }: { name: string; error?: string }) {
+  if (!error) return null;
+  return (
+    <p id={`${name}-error`} className="mt-1.5 flex items-start gap-1.5 text-sm text-danger">
+      <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0" aria-hidden>
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-.75-11.5a.75.75 0 0 1 1.5 0v4a.75.75 0 0 1-1.5 0v-4zM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+          clipRule="evenodd"
+        />
+      </svg>
+      {error}
+    </p>
+  );
+}
 
 function Field({
   label,
   htmlFor,
+  optional,
+  hint,
+  error,
   className = "",
   children,
 }: {
   label: string;
   htmlFor: string;
+  optional?: boolean;
+  hint?: string;
+  error?: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -40,16 +118,30 @@ function Field({
     <div className={className}>
       <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-soft">
         {label}
+        <RequiredMark optional={optional} />
       </label>
+      {hint && (
+        <p id={`${htmlFor}-hint`} className="-mt-0.5 mb-1.5 text-xs text-muted">
+          {hint}
+        </p>
+      )}
       {children}
+      <ErrorMessage name={htmlFor} error={error} />
     </div>
   );
 }
 
-function Select({ id, options }: { id: string; options: string[] }) {
+function Select({ id, options, errors }: { id: string; options: string[]; errors: Errors }) {
   return (
     <div className="relative">
-      <select id={id} name={id} required defaultValue="" className={`${inputClass} appearance-none pr-10`}>
+      <select
+        id={id}
+        name={id}
+        required
+        defaultValue=""
+        className={`${inputClass(!!errors[id])} appearance-none pr-10`}
+        {...a11y(id, errors)}
+      >
         <option value="" disabled>
           Selecciona una opción
         </option>
@@ -74,20 +166,53 @@ function Select({ id, options }: { id: string; options: string[] }) {
 }
 
 /* Opciones excluyentes como botones segmentados. */
-function Segmented({ name, legend, options }: { name: string; legend: string; options: string[] }) {
+function Segmented({
+  name,
+  legend,
+  options,
+  errors,
+}: {
+  name: string;
+  legend: string;
+  options: string[];
+  errors: Errors;
+}) {
+  const invalid = !!errors[name];
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium text-soft">{legend}</legend>
-      <div className="grid auto-cols-fr grid-flow-col gap-2">
+      <legend id={`${name}-legend`} className="mb-2 text-sm font-medium text-soft">
+        {legend}
+        <RequiredMark />
+      </legend>
+      <div
+        role="radiogroup"
+        aria-labelledby={`${name}-legend`}
+        aria-required
+        aria-invalid={invalid || undefined}
+        aria-describedby={invalid ? `${name}-error` : undefined}
+        className="grid auto-cols-fr grid-flow-col gap-2"
+      >
         {options.map((o, i) => (
           <label key={o} className="cursor-pointer">
-            <input type="radio" name={name} value={o} required={i === 0} className="peer sr-only" />
-            <span className="block rounded-lg border border-control bg-background px-3 py-2.5 text-center text-sm text-muted transition hover:text-foreground peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40">
+            <input
+              id={`${name}-${i}`}
+              type="radio"
+              name={name}
+              value={o}
+              required
+              className="peer sr-only"
+            />
+            <span
+              className={`block rounded-lg border bg-background px-3 py-2.5 text-center text-sm text-muted transition hover:text-foreground peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40 ${
+                invalid ? "border-danger" : "border-control"
+              }`}
+            >
               {o}
             </span>
           </label>
         ))}
       </div>
+      <ErrorMessage name={name} error={errors[name]} />
     </fieldset>
   );
 }
@@ -103,13 +228,56 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 
 export function WaitlistForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<Errors>({});
+  const [attempted, setAttempted] = useState(false);
+  // Campos que la persona ya ha tocado: solo se validan al salir de ellos a partir de entonces.
+  const touched = useRef(new Set<string>());
   const sending = status === "sending";
+
+  function updateError(form: HTMLFormElement, name: string) {
+    const message = validateField(form, name);
+    setErrors((prev) => {
+      if ((prev[name] ?? "") === message) return prev;
+      const next = { ...prev };
+      if (message) next[name] = message;
+      else delete next[name];
+      return next;
+    });
+  }
+
+  function handleChange(e: FormEvent<HTMLFormElement>) {
+    const target = e.target as HTMLInputElement;
+    if (!target.name) return;
+    touched.current.add(target.name);
+    // Si el campo tenía error, se revalida al momento para quitarlo en cuanto se corrige.
+    if (errors[target.name]) updateError(e.currentTarget, target.name);
+  }
+
+  function handleBlur(e: FocusEvent<HTMLFormElement>) {
+    const target = e.target as HTMLElement as HTMLInputElement;
+    if (!target.name || target.type === "radio") return;
+    if (attempted || touched.current.has(target.name)) updateError(e.currentTarget, target.name);
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    setStatus("sending");
 
+    const found: Errors = {};
+    for (const { name } of REQUIRED_FIELDS) {
+      const message = validateField(form, name);
+      if (message) found[name] = message;
+    }
+    setAttempted(true);
+    setErrors(found);
+
+    const first = REQUIRED_FIELDS.find((f) => found[f.name]);
+    if (first) {
+      document.getElementById(focusId(first.name))?.focus();
+      return;
+    }
+
+    setStatus("sending");
     try {
       const res = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
@@ -118,6 +286,8 @@ export function WaitlistForm() {
       });
       if (!res.ok) throw new Error(`Formspree respondió ${res.status}`);
       form.reset();
+      touched.current.clear();
+      setAttempted(false);
       setStatus("success");
     } catch {
       setStatus("error");
@@ -150,12 +320,18 @@ export function WaitlistForm() {
     );
   }
 
+  const errorList = REQUIRED_FIELDS.filter((f) => errors[f.name]);
+
   return (
     <form
       onSubmit={handleSubmit}
+      onChange={handleChange}
+      onBlur={handleBlur}
       action={FORMSPREE_ENDPOINT}
       method="POST"
+      noValidate
       aria-busy={sending}
+      aria-describedby="form-nota"
       className="space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8"
     >
       <input type="hidden" name="source" value="saikiu-web" />
@@ -163,87 +339,171 @@ export function WaitlistForm() {
       {/* Honeypot anti-spam de Formspree: los usuarios reales no lo ven ni lo rellenan. */}
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
+      <p id="form-nota" className="text-sm text-muted">
+        Los campos marcados con <span className="font-semibold text-foreground">*</span> son
+        obligatorios.
+      </p>
+
+      {attempted && errorList.length > 0 && (
+        <div role="alert" className="rounded-lg border border-danger bg-background px-4 py-3 text-sm">
+          <p className="font-medium text-danger">
+            {errorList.length === 1
+              ? "Falta 1 campo por completar:"
+              : `Faltan ${errorList.length} campos por completar:`}
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-foreground">
+            {errorList.map((f) => (
+              <li key={f.name}>
+                <a
+                  href={`#${focusId(f.name)}`}
+                  onClick={(e) => {
+                    const el = document.getElementById(focusId(f.name));
+                    if (!el) return;
+                    e.preventDefault();
+                    el.scrollIntoView({ block: "center" });
+                    el.focus({ preventScroll: true });
+                  }}
+                  className="underline underline-offset-4 hover:no-underline"
+                >
+                  {f.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <Group title="Sobre ti">
-        <Field label="Nombre" htmlFor="nombre">
-          <input id="nombre" name="nombre" required autoComplete="given-name" className={inputClass} />
+        <Field label="Nombre" htmlFor="nombre" error={errors.nombre}>
+          <input
+            id="nombre"
+            name="nombre"
+            required
+            autoComplete="given-name"
+            className={inputClass(!!errors.nombre)}
+            {...a11y("nombre", errors)}
+          />
         </Field>
-        <Field label="Apellidos" htmlFor="apellidos">
-          <input id="apellidos" name="apellidos" required autoComplete="family-name" className={inputClass} />
+        <Field label="Apellidos" htmlFor="apellidos" error={errors.apellidos}>
+          <input
+            id="apellidos"
+            name="apellidos"
+            required
+            autoComplete="family-name"
+            className={inputClass(!!errors.apellidos)}
+            {...a11y("apellidos", errors)}
+          />
         </Field>
-        <Field label="Email" htmlFor="email" className="sm:col-span-2">
+        <Field label="Email" htmlFor="email" error={errors.email} className="sm:col-span-2">
           <input
             id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            placeholder="nombre@empresa.com"
-            className={inputClass}
+            placeholder="tu@email.com"
+            className={inputClass(!!errors.email)}
+            {...a11y("email", errors)}
           />
         </Field>
       </Group>
 
-      <Group title="Tu empresa">
-        <Field label="Empresa" htmlFor="empresa">
-          <input id="empresa" name="empresa" required autoComplete="organization" className={inputClass} />
-        </Field>
-        <Field label="Cargo" htmlFor="cargo">
+      <Group title="Tu actividad">
+        <Field label="Ocupación o cargo" htmlFor="cargo" error={errors.cargo}>
           <input
             id="cargo"
             name="cargo"
             required
             autoComplete="organization-title"
-            placeholder="CEO, Operaciones, Marketing…"
-            className={inputClass}
+            placeholder="Freelance, CEO, marketing, consultoría…"
+            className={inputClass(!!errors.cargo)}
+            {...a11y("cargo", errors)}
           />
         </Field>
-        <Field label="Número de empleados" htmlFor="empleados">
-          <Select id="empleados" options={EMPLEADOS} />
+        <Field
+          label="Empresa o proyecto"
+          htmlFor="empresa"
+          optional
+          hint="Si trabajas por tu cuenta, puedes dejarlo vacío."
+        >
+          <input
+            id="empresa"
+            name="empresa"
+            autoComplete="organization"
+            aria-describedby="empresa-hint"
+            className={inputClass(false)}
+          />
         </Field>
-        <Field label="Sector" htmlFor="sector">
-          <Select id="sector" options={SECTORES} />
+        <Field label="¿Cuántas personas sois?" htmlFor="personas" error={errors.personas}>
+          <Select id="personas" options={PERSONAS} errors={errors} />
+        </Field>
+        <Field label="Sector" htmlFor="sector" error={errors.sector}>
+          <Select id="sector" options={SECTORES} errors={errors} />
         </Field>
       </Group>
 
       <Group title="Tu situación">
-        <Field label="¿Qué problema te gustaría resolver?" htmlFor="problema" className="sm:col-span-2">
+        <Field
+          label="¿Qué problema te gustaría resolver?"
+          htmlFor="problema"
+          error={errors.problema}
+          className="sm:col-span-2"
+        >
           <textarea
             id="problema"
             name="problema"
             required
             rows={4}
-            placeholder="Ej.: dedicamos muchas horas a tareas manuales y no sabemos qué herramientas de IA nos convienen."
-            className={`${inputClass} resize-y`}
+            placeholder="Ej.: dedico muchas horas a tareas repetitivas y no sé qué herramientas de IA me convienen."
+            className={`${inputClass(!!errors.problema)} resize-y`}
+            {...a11y("problema", errors)}
           />
         </Field>
-        <Segmented name="usaIA" legend="¿Utilizas IA actualmente?" options={["Sí", "No"]} />
+        <Segmented name="usaIA" legend="¿Utilizas IA actualmente?" options={["Sí", "No"]} errors={errors} />
         <Segmented
           name="usaAutomatizaciones"
           legend="¿Utilizas automatizaciones actualmente?"
           options={["Sí", "No"]}
+          errors={errors}
         />
-        <Segmented name="pagaria" legend="¿Pagarías por una solución así?" options={["Sí", "No", "Depende"]} />
+        <Segmented
+          name="pagaria"
+          legend="¿Pagarías por una solución así?"
+          options={["Sí", "No", "Depende"]}
+          errors={errors}
+        />
         <Segmented
           name="valor"
-          legend="¿Cuánto valor tendría para tu empresa?"
+          legend="¿Cuánto valor tendría para ti o tu negocio?"
           options={["Bajo", "Medio", "Alto"]}
+          errors={errors}
         />
       </Group>
 
-      <label className="flex items-start gap-3 border-t border-border pt-6 text-sm text-muted">
-        <input type="checkbox" name="privacidad" required className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
-        <span>
-          Acepto la{" "}
-          <Link
-            href="/politica-privacidad"
-            target="_blank"
-            className="text-foreground underline underline-offset-4 hover:no-underline"
-          >
-            política de privacidad
-          </Link>
-          .
-        </span>
-      </label>
+      <div className="border-t border-border pt-6">
+        <label className="flex items-start gap-3 text-sm text-muted">
+          <input
+            id="privacidad"
+            type="checkbox"
+            name="privacidad"
+            required
+            className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+            {...a11y("privacidad", errors)}
+          />
+          <span>
+            Acepto la{" "}
+            <Link
+              href="/politica-privacidad"
+              target="_blank"
+              className="text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              política de privacidad
+            </Link>
+            .<RequiredMark />
+          </span>
+        </label>
+        <ErrorMessage name="privacidad" error={errors.privacidad} />
+      </div>
 
       {status === "error" && (
         <p role="alert" className="rounded-lg border border-control bg-background px-4 py-3 text-sm text-foreground">
