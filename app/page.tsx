@@ -88,8 +88,8 @@ const PERFILES = [
 
 const ESTADO = [
   { when: "Hoy", title: "En desarrollo", text: "Construyendo la metodología y el motor de análisis.", current: true },
-  { when: "Junio 2027", title: "Beta", text: "Acceso anticipado para la lista de espera." },
-  { when: "Agosto 2027", title: "Lanzamiento", text: "AuditorIA disponible para todo el mundo." },
+  { when: "2027", title: "Beta", text: "Acceso anticipado para la lista de espera." },
+  { when: "2027", title: "Lanzamiento", text: "AuditorIA disponible para todo el mundo." },
 ];
 
 const FAQ = [
@@ -111,7 +111,7 @@ const FAQ = [
   },
   {
     q: "¿Cuándo estará disponible?",
-    a: "La beta está prevista para junio de 2027 y el lanzamiento para agosto de 2027. Las personas de la lista de espera tendrán acceso prioritario.",
+    a: "Tanto la beta como el lanzamiento están previstos para 2027. Las personas de la lista de espera tendrán acceso prioritario.",
   },
   {
     q: "¿Cuánto costará?",
@@ -441,8 +441,8 @@ export default function Home() {
                 <SaikiuMark className="h-5 w-5 text-brand" />
               </span>
               <p className="text-sm leading-relaxed text-muted">
-                <span className="font-medium text-foreground">Impulsado por AI Router</span>, la
-                tecnología interna de Saikiu.
+                Impulsado por <span className="font-medium text-foreground">Saikiu Router</span>,
+                nuestra tecnología propia que elige el modelo de IA más adecuado para cada caso.
               </p>
             </div>
 
@@ -543,7 +543,7 @@ export default function Home() {
                 className="absolute bottom-2 left-[7px] top-2 w-px bg-border md:bottom-auto md:left-0 md:right-0 md:top-[7px] md:h-px md:w-auto"
               />
               {ESTADO.map((r) => (
-                <li key={r.when} className="relative pl-10 md:pl-0 md:pt-12">
+                <li key={r.title} className="relative pl-10 md:pl-0 md:pt-12">
                   <span
                     className={`absolute left-0 top-0.5 h-[15px] w-[15px] rounded-full border-2 md:top-0 ${
                       r.current ? "border-accent bg-accent ring-4 ring-accent/20" : "border-muted/50 bg-background"
