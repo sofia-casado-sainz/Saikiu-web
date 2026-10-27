@@ -70,20 +70,19 @@ const PASOS = [
 
 const PERFILES = [
   {
-    title: "Pymes",
-    text: "Empresas que quieren ganar eficiencia con IA sin montar un equipo técnico ni contratar una gran consultora.",
+    title: "Trabajas por tu cuenta",
+    ejemplos: "Autónomos, freelances y profesionales independientes",
+    text: "Recupera las horas que se van en emails, presupuestos, facturas y tareas repetitivas, sin necesidad de tener una empresa.",
   },
   {
-    title: "Autónomos y freelances",
-    text: "Profesionales que trabajan por su cuenta y quieren recuperar horas de tareas repetitivas.",
+    title: "Tienes un pequeño negocio",
+    ejemplos: "Pymes, comercios, despachos y estudios",
+    text: "Descubre qué automatizar primero para ganar eficiencia sin montar un equipo técnico ni contratar una gran consultora.",
   },
   {
-    title: "Profesionales sin empresa",
-    text: "Personas que quieren organizar mejor su trabajo con IA, aunque no tengan una empresa detrás.",
-  },
-  {
-    title: "Equipos y responsables",
-    text: "Dirección, operaciones o marketing: quien necesita decidir dónde invertir en IA con criterio, no por moda.",
+    title: "Lideras un equipo",
+    ejemplos: "Dirección, operaciones, marketing o ventas",
+    text: "Decide dónde invertir en IA con criterio, con datos sobre herramientas, costes y riesgos, no por moda.",
   },
 ];
 
@@ -100,7 +99,7 @@ const FAQ = [
   },
   {
     q: "¿Necesito tener una empresa?",
-    a: "No. AuditorIA sirve igual para pymes que para autónomos, freelances o personas que trabajan por su cuenta. Analizamos tu forma de trabajar, sea cual sea su tamaño.",
+    a: "No. AuditorIA sirve tanto si tienes una empresa como si trabajas por tu cuenta como autónomo, freelance o profesional independiente. Analizamos tu forma de trabajar, sea cual sea el tamaño de tu actividad.",
   },
   {
     q: "¿Necesito conocimientos técnicos?",
@@ -225,10 +224,10 @@ function CtaBlock({ label, center }: { label: string; center?: boolean }) {
 
 function ReportPreview() {
   const rows = [
-    { area: "Atención al cliente", saving: "≈ 22 h/mes", w: "88%", high: true },
-    { area: "Facturación", saving: "≈ 14 h/mes", w: "72%", high: true },
-    { area: "Reporting comercial", saving: "≈ 9 h/mes", w: "54%" },
-    { area: "Onboarding", saving: "≈ 6 h/mes", w: "40%" },
+    { area: "Emails y atención al cliente", saving: "≈ 22 h/mes", w: "88%", high: true },
+    { area: "Presupuestos y facturación", saving: "≈ 14 h/mes", w: "72%", high: true },
+    { area: "Publicación de contenido", saving: "≈ 9 h/mes", w: "54%" },
+    { area: "Agenda y reuniones", saving: "≈ 6 h/mes", w: "40%" },
   ];
   return (
     <div className="rounded-2xl border border-border bg-surface p-1.5 shadow-2xl shadow-slate-900/10 dark:shadow-black/50">
@@ -324,9 +323,8 @@ export default function Home() {
                 <span className="text-muted">y cuál no merece la pena.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-                Para pymes, autónomos, freelances y profesionales. AuditorIA analiza tus
-                herramientas, procesos y costes y te entrega un informe priorizado, revisado por un
-                especialista.
+                Tengas una empresa o trabajes por tu cuenta, AuditorIA analiza tus herramientas,
+                procesos y costes y te entrega un informe priorizado, revisado por un especialista.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
@@ -335,18 +333,10 @@ export default function Home() {
                 >
                   Solicitar acceso anticipado
                 </a>
-                <a
-                  href="#informe-ejemplo"
-                  className="rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold text-foreground transition hover:border-muted/40 hover:bg-surface"
-                >
-                  Ver un informe de ejemplo
-                </a>
               </div>
               <p className="mt-4 text-sm text-muted">{CTA_NOTA} · Solo te escribimos para la beta</p>
             </div>
-            <div id="informe-ejemplo" className="scroll-mt-24">
-              <ReportPreview />
-            </div>
+            <ReportPreview />
           </div>
         </section>
 
@@ -364,8 +354,8 @@ export default function Home() {
             <div className="space-y-5 text-lg leading-relaxed text-muted lg:pt-12">
               <p>
                 Casi todo el mundo usa ya alguna herramienta de IA, pero pocos saben si la
-                aprovechan bien, cuánto les cuesta o qué riesgos asumen. Da igual que seas una pyme,
-                un autónomo o trabajes por tu cuenta.
+                aprovechan bien, cuánto les cuesta o qué riesgos asumen. Pasa igual en una empresa
+                que trabajando por tu cuenta.
               </p>
               <p>
                 AuditorIA combina análisis con IA y revisión de especialistas para darte una
@@ -374,7 +364,7 @@ export default function Home() {
               </p>
               <dl className="grid grid-cols-1 gap-5 border-t border-border pt-6 sm:grid-cols-3">
                 {[
-                  { k: "Para", v: "Pymes y profesionales" },
+                  { k: "Para", v: "Empresas y profesionales" },
                   { k: "Resultado", v: "Informe accionable" },
                   { k: "Garantía", v: "Revisión humana" },
                 ].map((i) => (
@@ -393,7 +383,7 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-28">
             <SectionHeader
               eyebrow="Qué analiza"
-              title="Una visión completa de tu operación."
+              title="Una visión completa de cómo trabajas."
               text="Seis áreas que, juntas, explican dónde está el valor y dónde está el riesgo."
             />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
@@ -467,12 +457,13 @@ export default function Home() {
               eyebrow="Para quién"
               title="Para cualquiera que quiera trabajar mejor con IA, tenga o no una empresa."
             />
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16">
+            <div className="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16">
               {PERFILES.map((p, i) => (
-                <div key={p.title} className="rounded-xl border border-border bg-background p-6 sm:p-7">
+                <div key={p.title} className="flex flex-col rounded-xl border border-border bg-background p-6 sm:p-7">
                   <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>
                   <h3 className="mt-3 text-lg font-semibold">{p.title}</h3>
-                  <p className="mt-2 leading-relaxed text-muted">{p.text}</p>
+                  <p className="mt-1 text-sm text-soft">{p.ejemplos}</p>
+                  <p className="mt-3 leading-relaxed text-muted">{p.text}</p>
                 </div>
               ))}
             </div>
