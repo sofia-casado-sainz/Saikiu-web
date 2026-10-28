@@ -1,10 +1,19 @@
 import { ImageResponse } from "next/og";
+import { DEFAULT_LOCALE, LOCALES, hasLocale } from "../i18n/config";
+import { getDictionary } from "../i18n/dictionaries";
 
-export const alt = "AuditorIA by Saikiu — Detecta oportunidades de IA y automatización antes de invertir tiempo y dinero";
+export const alt = getDictionary(DEFAULT_LOCALE).meta.ogAlt;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+export function generateStaticParams() {
+  return LOCALES.map((lang) => ({ lang }));
+}
+
+export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const { meta } = getDictionary(hasLocale(lang) ? lang : DEFAULT_LOCALE);
+
   return new ImageResponse(
     (
       <div
@@ -35,7 +44,7 @@ export default function Image() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
           <div style={{ display: "flex", flexWrap: "wrap", fontSize: 60, fontWeight: 700, lineHeight: 1.1, maxWidth: 980 }}>
-            Detecta oportunidades de IA y automatización antes de invertir tiempo y dinero.
+            {meta.ogHeadline}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 30, color: "#94A3B8" }}>
             <span
@@ -47,9 +56,9 @@ export default function Image() {
                 fontSize: 24,
               }}
             >
-              Primer producto
+              {meta.ogBadge}
             </span>
-            AuditorIA
+            Auditor
           </div>
         </div>
       </div>

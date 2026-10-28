@@ -2,60 +2,49 @@
 
 import Link from "next/link";
 import { useRef, useState, type FocusEvent, type FormEvent, type ReactNode } from "react";
+import type { Locale } from "../i18n/config";
+import type { Dictionary } from "../i18n/dictionaries";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xljjjqyr";
 
 type Status = "idle" | "sending" | "success" | "error";
 type Errors = Record<string, string>;
+type FormText = Dictionary["form"];
 
-const PERSONAS = ["Solo yo", "2–10", "11–50", "51–250", "Más de 250"];
-
-const SECTORES = [
-  "Consultoría / Servicios profesionales",
-  "Diseño / Creatividad / Contenido",
-  "Agencia / Marketing",
-  "Tecnología / Software",
-  "E-commerce / Retail",
-  "Educación / Formación",
-  "Salud / Bienestar",
-  "Legal / Finanzas / Seguros",
-  "Inmobiliaria",
-  "Industria / Logística",
-  "Uso personal",
-  "Otro",
-];
+const RADIO_FIELDS = ["usaIA", "usaAutomatizaciones", "pagaria", "valor"];
 
 /*
  * Campos obligatorios en orden de aparición, con el texto del resumen de errores
  * y el mensaje que se muestra si están vacíos.
  */
-const REQUIRED_FIELDS: { name: string; label: string; message: string }[] = [
-  { name: "nombre", label: "Nombre", message: "Escribe tu nombre." },
-  { name: "apellidos", label: "Apellidos", message: "Escribe tus apellidos." },
-  { name: "email", label: "Email", message: "Escribe tu email." },
-  { name: "cargo", label: "Ocupación o cargo", message: "Indica a qué te dedicas." },
-  { name: "personas", label: "¿Cuántas personas sois?", message: "Elige una opción." },
-  { name: "sector", label: "Sector", message: "Elige un sector." },
-  { name: "problema", label: "Qué te gustaría resolver", message: "Cuéntanos qué te gustaría resolver." },
-  { name: "usaIA", label: "¿Utilizas IA actualmente?", message: "Elige una opción." },
-  { name: "usaAutomatizaciones", label: "¿Utilizas automatizaciones actualmente?", message: "Elige una opción." },
-  { name: "pagaria", label: "¿Pagarías por una solución así?", message: "Elige una opción." },
-  { name: "valor", label: "¿Cuánto valor tendría para ti?", message: "Elige una opción." },
-  { name: "privacidad", label: "Política de privacidad", message: "Debes aceptar la política de privacidad para apuntarte." },
-];
+function requiredFields(t: FormText) {
+  return [
+    { name: "nombre", label: t.labels.nombre, message: t.errors.nombre },
+    { name: "apellidos", label: t.labels.apellidos, message: t.errors.apellidos },
+    { name: "email", label: t.labels.email, message: t.errors.email },
+    { name: "cargo", label: t.labels.cargo, message: t.errors.cargo },
+    { name: "personas", label: t.labels.personas, message: t.errors.personas },
+    { name: "sector", label: t.labels.sector, message: t.errors.sector },
+    { name: "problema", label: t.summaryLabels.problema, message: t.errors.problema },
+    { name: "usaIA", label: t.labels.usaIA, message: t.errors.option },
+    { name: "usaAutomatizaciones", label: t.labels.usaAutomatizaciones, message: t.errors.option },
+    { name: "pagaria", label: t.labels.pagaria, message: t.errors.option },
+    { name: "valor", label: t.summaryLabels.valor, message: t.errors.option },
+    { name: "privacidad", label: t.labels.privacidad, message: t.errors.privacidad },
+  ];
+}
 
 /* Id del elemento al que enfocar o enlazar desde el resumen de errores. */
-const focusId = (name: string) =>
-  ["usaIA", "usaAutomatizaciones", "pagaria", "valor"].includes(name) ? `${name}-0` : name;
+const focusId = (name: string) => (RADIO_FIELDS.includes(name) ? `${name}-0` : name);
 
-function validateField(form: HTMLFormElement, name: string): string {
-  const field = REQUIRED_FIELDS.find((f) => f.name === name);
+function validateField(form: HTMLFormElement, name: string, t: FormText): string {
+  const field = requiredFields(t).find((f) => f.name === name);
   if (!field) return "";
   const item = form.elements.namedItem(name);
   const el = item instanceof RadioNodeList ? (item[0] as HTMLInputElement) : (item as HTMLInputElement | null);
   if (!el) return "";
   if (el.validity.valueMissing) return field.message;
-  if (el.validity.typeMismatch && name === "email") return "Escribe un email válido, por ejemplo: tu@email.com.";
+  if (el.validity.typeMismatch && name === "email") return t.errors.emailInvalid;
   return "";
 }
 
@@ -71,9 +60,9 @@ const a11y = (name: string, errors: Errors) => ({
   "aria-describedby": errors[name] ? `${name}-error` : undefined,
 });
 
-function RequiredMark({ optional }: { optional?: boolean }) {
+function RequiredMark({ optional }: { optional?: string }) {
   return optional ? (
-    <span className="ml-1 font-normal text-muted">(opcional)</span>
+    <span className="ml-1 font-normal text-muted">{optional}</span>
   ) : (
     <span aria-hidden className="ml-0.5 text-foreground">
       *
@@ -108,7 +97,7 @@ function Field({
 }: {
   label: string;
   htmlFor: string;
-  optional?: boolean;
+  optional?: string;
   hint?: string;
   error?: string;
   className?: string;
@@ -131,7 +120,17 @@ function Field({
   );
 }
 
-function Select({ id, options, errors }: { id: string; options: string[]; errors: Errors }) {
+function Select({
+  id,
+  options,
+  placeholder,
+  errors,
+}: {
+  id: string;
+  options: string[];
+  placeholder: string;
+  errors: Errors;
+}) {
   return (
     <div className="relative">
       <select
@@ -143,7 +142,7 @@ function Select({ id, options, errors }: { id: string; options: string[]; errors
         {...a11y(id, errors)}
       >
         <option value="" disabled>
-          Selecciona una opción
+          {placeholder}
         </option>
         {options.map((o) => (
           <option key={o} value={o}>
@@ -194,14 +193,7 @@ function Segmented({
       >
         {options.map((o, i) => (
           <label key={o} className="cursor-pointer">
-            <input
-              id={`${name}-${i}`}
-              type="radio"
-              name={name}
-              value={o}
-              required
-              className="peer sr-only"
-            />
+            <input id={`${name}-${i}`} type="radio" name={name} value={o} required className="peer sr-only" />
             <span
               className={`block rounded-lg border bg-background px-3 py-2.5 text-center text-sm text-muted transition hover:text-foreground peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40 ${
                 invalid ? "border-danger" : "border-control"
@@ -226,16 +218,17 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function WaitlistForm() {
+export function WaitlistForm({ lang, t }: { lang: Locale; t: FormText }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [attempted, setAttempted] = useState(false);
   // Campos que la persona ya ha tocado: solo se validan al salir de ellos a partir de entonces.
   const touched = useRef(new Set<string>());
   const sending = status === "sending";
+  const fields = requiredFields(t);
 
   function updateError(form: HTMLFormElement, name: string) {
-    const message = validateField(form, name);
+    const message = validateField(form, name, t);
     setErrors((prev) => {
       if ((prev[name] ?? "") === message) return prev;
       const next = { ...prev };
@@ -264,14 +257,14 @@ export function WaitlistForm() {
     const form = e.currentTarget;
 
     const found: Errors = {};
-    for (const { name } of REQUIRED_FIELDS) {
-      const message = validateField(form, name);
+    for (const { name } of fields) {
+      const message = validateField(form, name, t);
       if (message) found[name] = message;
     }
     setAttempted(true);
     setErrors(found);
 
-    const first = REQUIRED_FIELDS.find((f) => found[f.name]);
+    const first = fields.find((f) => found[f.name]);
     if (first) {
       document.getElementById(focusId(first.name))?.focus();
       return;
@@ -303,24 +296,20 @@ export function WaitlistForm() {
         <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-2xl">
           <span aria-hidden>✅</span>
         </div>
-        <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-          Gracias por apuntarte a la lista de espera.
-        </h3>
-        <p className="mx-auto mt-3 max-w-sm leading-relaxed text-muted">
-          Te avisaremos cuando AuditorIA comience las pruebas.
-        </p>
+        <h3 className="mt-6 text-2xl font-semibold tracking-tight">{t.successTitle}</h3>
+        <p className="mx-auto mt-3 max-w-sm leading-relaxed text-muted">{t.successText}</p>
         <button
           type="button"
           onClick={() => setStatus("idle")}
           className="mt-8 text-sm text-muted underline-offset-4 transition hover:text-foreground hover:underline"
         >
-          Inscribir a otra persona
+          {t.again}
         </button>
       </div>
     );
   }
 
-  const errorList = REQUIRED_FIELDS.filter((f) => errors[f.name]);
+  const errorList = fields.filter((f) => errors[f.name]);
 
   return (
     <form
@@ -335,21 +324,19 @@ export function WaitlistForm() {
       className="space-y-6 rounded-2xl border border-border bg-surface p-5 sm:p-8"
     >
       <input type="hidden" name="source" value="saikiu-web" />
-      <input type="hidden" name="_subject" value="Nueva inscripción en la lista de espera de AuditorIA" />
+      <input type="hidden" name="idioma" value={lang} />
+      <input type="hidden" name="_subject" value={t.subject} />
       {/* Honeypot anti-spam de Formspree: los usuarios reales no lo ven ni lo rellenan. */}
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
       <p id="form-nota" className="text-sm text-muted">
-        Los campos marcados con <span className="font-semibold text-foreground">*</span> son
-        obligatorios.
+        {t.requiredNote} <span className="font-semibold text-foreground">*</span> {t.requiredNoteEnd}
       </p>
 
       {attempted && errorList.length > 0 && (
         <div role="alert" className="rounded-lg border border-danger bg-background px-4 py-3 text-sm">
           <p className="font-medium text-danger">
-            {errorList.length === 1
-              ? "Falta 1 campo por completar:"
-              : `Faltan ${errorList.length} campos por completar:`}
+            {errorList.length === 1 ? t.summaryOne : t.summaryMany.replace("{n}", String(errorList.length))}
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-foreground">
             {errorList.map((f) => (
@@ -373,8 +360,8 @@ export function WaitlistForm() {
         </div>
       )}
 
-      <Group title="Sobre ti">
-        <Field label="Nombre" htmlFor="nombre" error={errors.nombre}>
+      <Group title={t.groups.about}>
+        <Field label={t.labels.nombre} htmlFor="nombre" error={errors.nombre}>
           <input
             id="nombre"
             name="nombre"
@@ -384,7 +371,7 @@ export function WaitlistForm() {
             {...a11y("nombre", errors)}
           />
         </Field>
-        <Field label="Apellidos" htmlFor="apellidos" error={errors.apellidos}>
+        <Field label={t.labels.apellidos} htmlFor="apellidos" error={errors.apellidos}>
           <input
             id="apellidos"
             name="apellidos"
@@ -394,38 +381,33 @@ export function WaitlistForm() {
             {...a11y("apellidos", errors)}
           />
         </Field>
-        <Field label="Email" htmlFor="email" error={errors.email} className="sm:col-span-2">
+        <Field label={t.labels.email} htmlFor="email" error={errors.email} className="sm:col-span-2">
           <input
             id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            placeholder="tu@email.com"
+            placeholder={t.placeholders.email}
             className={inputClass(!!errors.email)}
             {...a11y("email", errors)}
           />
         </Field>
       </Group>
 
-      <Group title="Tu actividad">
-        <Field label="Ocupación o cargo" htmlFor="cargo" error={errors.cargo}>
+      <Group title={t.groups.activity}>
+        <Field label={t.labels.cargo} htmlFor="cargo" error={errors.cargo}>
           <input
             id="cargo"
             name="cargo"
             required
             autoComplete="organization-title"
-            placeholder="Freelance, CEO, marketing, consultoría…"
+            placeholder={t.placeholders.cargo}
             className={inputClass(!!errors.cargo)}
             {...a11y("cargo", errors)}
           />
         </Field>
-        <Field
-          label="Empresa o proyecto"
-          htmlFor="empresa"
-          optional
-          hint="Si trabajas por tu cuenta, puedes dejarlo vacío."
-        >
+        <Field label={t.labels.empresa} htmlFor="empresa" optional={t.optional} hint={t.empresaHint}>
           <input
             id="empresa"
             name="empresa"
@@ -434,50 +416,35 @@ export function WaitlistForm() {
             className={inputClass(false)}
           />
         </Field>
-        <Field label="¿Cuántas personas sois?" htmlFor="personas" error={errors.personas}>
-          <Select id="personas" options={PERSONAS} errors={errors} />
+        <Field label={t.labels.personas} htmlFor="personas" error={errors.personas}>
+          <Select id="personas" options={t.options.personas} placeholder={t.selectPlaceholder} errors={errors} />
         </Field>
-        <Field label="Sector" htmlFor="sector" error={errors.sector}>
-          <Select id="sector" options={SECTORES} errors={errors} />
+        <Field label={t.labels.sector} htmlFor="sector" error={errors.sector}>
+          <Select id="sector" options={t.options.sector} placeholder={t.selectPlaceholder} errors={errors} />
         </Field>
       </Group>
 
-      <Group title="Tu situación">
-        <Field
-          label="¿Qué problema te gustaría resolver?"
-          htmlFor="problema"
-          error={errors.problema}
-          className="sm:col-span-2"
-        >
+      <Group title={t.groups.situation}>
+        <Field label={t.labels.problema} htmlFor="problema" error={errors.problema} className="sm:col-span-2">
           <textarea
             id="problema"
             name="problema"
             required
             rows={4}
-            placeholder="Ej.: dedico muchas horas a tareas repetitivas y no sé qué herramientas de IA me convienen."
+            placeholder={t.placeholders.problema}
             className={`${inputClass(!!errors.problema)} resize-y`}
             {...a11y("problema", errors)}
           />
         </Field>
-        <Segmented name="usaIA" legend="¿Utilizas IA actualmente?" options={["Sí", "No"]} errors={errors} />
+        <Segmented name="usaIA" legend={t.labels.usaIA} options={t.options.yesNo} errors={errors} />
         <Segmented
           name="usaAutomatizaciones"
-          legend="¿Utilizas automatizaciones actualmente?"
-          options={["Sí", "No"]}
+          legend={t.labels.usaAutomatizaciones}
+          options={t.options.yesNo}
           errors={errors}
         />
-        <Segmented
-          name="pagaria"
-          legend="¿Pagarías por una solución así?"
-          options={["Sí", "No", "Depende"]}
-          errors={errors}
-        />
-        <Segmented
-          name="valor"
-          legend="¿Cuánto valor tendría para ti o tu negocio?"
-          options={["Bajo", "Medio", "Alto"]}
-          errors={errors}
-        />
+        <Segmented name="pagaria" legend={t.labels.pagaria} options={t.options.pagaria} errors={errors} />
+        <Segmented name="valor" legend={t.labels.valor} options={t.options.valor} errors={errors} />
       </Group>
 
       <div className="border-t border-border pt-6">
@@ -491,13 +458,13 @@ export function WaitlistForm() {
             {...a11y("privacidad", errors)}
           />
           <span>
-            Acepto la{" "}
+            {t.privacyBefore}{" "}
             <Link
-              href="/politica-privacidad"
+              href={`/${lang}/politica-privacidad`}
               target="_blank"
               className="text-foreground underline underline-offset-4 hover:no-underline"
             >
-              política de privacidad
+              {t.privacyLink}
             </Link>
             .<RequiredMark />
           </span>
@@ -507,8 +474,7 @@ export function WaitlistForm() {
 
       {status === "error" && (
         <p role="alert" className="rounded-lg border border-control bg-background px-4 py-3 text-sm text-foreground">
-          No hemos podido enviar tu inscripción. Revisa tu conexión e inténtalo de nuevo en unos
-          minutos.
+          {t.sendError}
         </p>
       )}
 
@@ -518,10 +484,10 @@ export function WaitlistForm() {
         className="group flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-accent-fg transition hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-wait disabled:opacity-70"
       >
         {sending ? (
-          "Enviando..."
+          t.sending
         ) : (
           <>
-            Reservar mi plaza
+            {t.submit}
             <span aria-hidden className="transition group-hover:translate-x-0.5">
               →
             </span>
